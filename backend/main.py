@@ -57,12 +57,30 @@ async def analyze_radio(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     
     try:
+        import soundfile as sf
+        import torch
+        import torchaudio.functional as F
+
+        audio_data, sr = sf.read(temp_file_path)
+        
+        # Convert to mono if multi-channel
+        if audio_data.ndim > 1:
+            audio_data = audio_data.mean(axis=1)
+
+        audio_tensor = torch.from_numpy(audio_data.astype("float32"))
+
+        # Resample to 16kHz for Whisper
+        if sr != 16000:
+            whisper_audio = F.resample(audio_tensor, sr, 16000).numpy()
+        else:
+            whisper_audio = audio_tensor.numpy()
+
         # 1. Speech-to-Text with Whisper
-        result = whisper_model.transcribe(temp_file_path)
+        result = whisper_model.transcribe(whisper_audio)
         transcript = result.get("text", "").strip()
 
         # 2. Speech Emotion Recognition with Wav2Vec2
-        emotions = emotion_classifier(temp_file_path)
+        emotions = emotion_classifier({"array": audio_data.astype("float32"), "sampling_rate": sr})
         
         top_emotion = emotions[0]
         label = top_emotion["label"]
@@ -76,6 +94,9 @@ async def analyze_radio(file: UploadFile = File(...)):
             stress_score=stress_score,
             confidence=round(confidence, 4)
         )
+    except Exception as e:
+        print(f"Error in analyze_radio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
