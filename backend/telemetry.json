@@ -1,0 +1,72 @@
+[
+  {
+    "lap": 1,
+    "lap_time": 84.2,
+    "stress_score": 2,
+    "mood": "Calm",
+    "radio_id": "lap1.wav"
+  },
+  {
+    "lap": 2,
+    "lap_time": 84.0,
+    "stress_score": 2,
+    "mood": "Calm",
+    "radio_id": "lap2.wav"
+  },
+  {
+    "lap": 3,
+    "lap_time": 84.5,
+    "stress_score": 3,
+    "mood": "Calm",
+    "radio_id": "lap3.wav"
+  },
+  {
+    "lap": 4,
+    "lap_time": 86.1,
+    "stress_score": 8,
+    "mood": "Stressed",
+    "radio_id": "lap4.wav"
+  },
+  {
+    "lap": 5,
+    "lap_time": 87.3,
+    "stress_score": 9,
+    "mood": "Stressed",
+    "radio_id": "lap5.wav"
+  },
+  {
+    "lap": 6,
+    "lap_time": 87.5,
+    "stress_score": 9,
+    "mood": "Stressed",
+    "radio_id": "lap6.wav"
+  },
+  {
+    "lap": 7,
+    "lap_time": 86.8,
+    "stress_score": 6,
+    "mood": "Tired",
+    "radio_id": "lap7.wav"
+  },
+  {
+    "lap": 8,
+    "lap_time": 86.5,
+    "stress_score": 5,
+    "mood": "Tired",
+    "radio_id": "lap8.wav"
+  },
+  {
+    "lap": 9,
+    "lap_time": 85.2,
+    "stress_score": 4,
+    "mood": "Tired",
+    "radio_id": "lap9.wav"
+  },
+  {
+    "lap": 10,
+    "lap_time": 84.8,
+    "stress_score": 3,
+    "mood": "Calm",
+    "radio_id": "lap10.wav"
+  }
+]
