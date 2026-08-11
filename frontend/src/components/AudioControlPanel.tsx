@@ -22,7 +22,8 @@ const AudioControlPanel: React.FC<Props> = ({ onAnalysisResult }) => {
     const formData = new FormData();
     formData.append('file', selectedFile);
     try {
-      const res = await axios.post('http://localhost:8000/analyze-radio', formData, {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const res = await axios.post(`${baseUrl}/analyze-radio`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       onAnalysisResult(res.data);

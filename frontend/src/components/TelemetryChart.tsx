@@ -18,7 +18,8 @@ const TelemetryChart: React.FC = () => {
   useEffect(() => {
     const fetchTelemetry = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/telemetry');
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        const res = await axios.get(`${baseUrl}/telemetry`);
         setData(res.data);
       } catch (err) {
         console.error('Failed to fetch telemetry', err);
