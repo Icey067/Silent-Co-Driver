@@ -116,7 +116,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
             playsInline
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-950 to-black">
+          <div className="w-full h-full bg-black">
             {/* Neon grid */}
             <div
               className="absolute inset-0 opacity-[0.05]"
@@ -143,7 +143,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
       <div
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(2,6,23,0.7) 100%)',
+          background: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(0,0,0,0.85) 100%)',
         }}
       />
 
@@ -199,7 +199,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
       </div>
 
       {/* Bottom fade to next section */}
-      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none z-20" />
+      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black to-transparent pointer-events-none z-20" />
     </section>
   );
 };

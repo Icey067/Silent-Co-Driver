@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, Suspense } from 'react';
+import React, { useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import {
   useGLTF,
@@ -6,13 +6,9 @@ import {
   ContactShadows,
   Float,
   MeshDistortMaterial,
-  MeshWobbleMaterial,
   Sphere,
   Torus,
   Box,
-  OrbitControls,
-  Text3D,
-  Center,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
@@ -20,25 +16,6 @@ import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
-
-// ─────────────────────────────────────────────
-// Mouse-tracking hook (normalised -1 to 1)
-// ─────────────────────────────────────────────
-function useMouse() {
-  const mouse = useRef({ x: 0, y: 0 });
-  const smoothMouse = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener('mousemove', onMove);
-    return () => window.removeEventListener('mousemove', onMove);
-  }, []);
-
-  return { mouse, smoothMouse };
-}
 
 // ─────────────────────────────────────────────
 // Camera rig that follows the mouse smoothly
@@ -88,7 +65,7 @@ function GLBModel({ path }: GLBModelProps) {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (!groupRef.current) return;
     // Gentle auto-spin + mouse-driven tilt
     groupRef.current.rotation.y += 0.003;
