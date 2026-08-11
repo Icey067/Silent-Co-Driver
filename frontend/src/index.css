@@ -1,9 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-gray-950 text-white antialiased;
+  html {
+    scroll-behavior: smooth;
   }
+  body {
+    @apply bg-black text-white antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@keyframes pulse {
+  0%   { opacity: 0.1; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(2); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }

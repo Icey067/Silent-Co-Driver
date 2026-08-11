@@ -8,3 +8,4 @@ torchaudio
 pyttsx3
 pydantic
 soundfile
+noisereduce
