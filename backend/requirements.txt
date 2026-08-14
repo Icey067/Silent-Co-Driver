@@ -1,11 +1,9 @@
 fastapi
 uvicorn
 python-multipart
-openai-whisper
-transformers
-torch
-torchaudio
-pyttsx3
 pydantic
-soundfile
-noisereduce
+faster-whisper
+librosa
+groq
+aiofiles
+python-dotenv

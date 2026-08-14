@@ -68,5 +68,40 @@
     "stress_score": 3,
     "mood": "Calm",
     "radio_id": "lap10.wav"
+  },
+  {
+    "lap": 11,
+    "lap_time": 86.954,
+    "stress_score": 5,
+    "status": "Stressed",
+    "radio_id": "lap11.wav"
+  },
+  {
+    "lap": 12,
+    "lap_time": 85.712,
+    "stress_score": 2,
+    "status": "Calm",
+    "radio_id": "lap12.wav"
+  },
+  {
+    "lap": 13,
+    "lap_time": 87.055,
+    "stress_score": 5,
+    "status": "Stressed",
+    "radio_id": "lap13.wav"
+  },
+  {
+    "lap": 14,
+    "lap_time": 86.437,
+    "stress_score": 5,
+    "status": "Stressed",
+    "radio_id": "lap14.wav"
+  },
+  {
+    "lap": 15,
+    "lap_time": 87.394,
+    "stress_score": 8,
+    "status": "Frustrated",
+    "radio_id": "lap15.wav"
   }
 ]

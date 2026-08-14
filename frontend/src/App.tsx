@@ -8,25 +8,30 @@ function App() {
     mood: 'Standby',
     stress_score: 0,
     confidence: 0,
+    driver_feedback_category: '',
+    actionable_insight: '',
+    tactical_intent: ''
   });
+  
+  const [radioHistory, setRadioHistory] = useState<any[]>([]);
 
   const handleAnalysisResult = (result: any) => {
-    setAnalysisResult({
-      transcript: result.transcript,
-      mood: result.mood,
-      stress_score: result.stress_score,
-      confidence: result.confidence,
-    });
+    // Add a mocked lap if it doesn't exist, just for visual realism
+    const enrichedResult = { ...result, lap: Math.floor(Math.random() * 50) + 1 };
+    
+    setAnalysisResult(enrichedResult);
+    setRadioHistory((prev) => [enrichedResult, ...prev].slice(0, 15)); // keep last 15
   };
 
   return (
-    <div className="bg-black text-white font-sans overflow-x-hidden">
+    <div className="bg-black text-lime-400 font-sans overflow-hidden">
       {/* ── Hero ── */}
       <HeroReveal />
 
       {/* ── Live Dashboard with NK Studio Scroll Animation ── */}
       <LiveDashboard
         analysisResult={analysisResult}
+        radioHistory={radioHistory}
         onAnalysisResult={handleAnalysisResult}
       />
     </div>

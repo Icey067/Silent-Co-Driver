@@ -124,7 +124,7 @@ const TimelineCard: React.FC<CardProps> = ({ event, index }) => {
           <span className="text-[9px] font-mono text-slate-600">{event.step} / 05</span>
         </div>
 
-        <h3 className="text-lg md:text-xl font-black text-white mb-2 tracking-tight">
+        <h3 className="text-lg md:text-xl font-black text-lime-400 mb-2 tracking-tight">
           {event.title}
         </h3>
         <p className="text-sm text-slate-400 leading-relaxed">{event.body}</p>
@@ -228,7 +228,7 @@ const ScrollTimeline: React.FC = () => {
             How it works
           </p>
 
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-lime-400 mb-4 leading-tight">
             The{' '}
             <span
               className="text-transparent bg-clip-text"

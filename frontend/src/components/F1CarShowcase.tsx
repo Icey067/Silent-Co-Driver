@@ -134,22 +134,22 @@ const F1CarShowcase: React.FC = () => {
       />
 
       {/* Thin top rule */}
-      <div className="absolute top-0 inset-x-0 h-px bg-white/8 z-20 pointer-events-none" />
-      <div className="absolute bottom-0 inset-x-0 h-px bg-white/8 z-20 pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-px bg-lime-500/8 z-20 pointer-events-none" />
+      <div className="absolute bottom-0 inset-x-0 h-px bg-lime-500/8 z-20 pointer-events-none" />
 
       {/* HUD labels */}
       <div className="absolute top-8 left-10 z-30 pointer-events-none">
-        <p className="text-[9px] uppercase tracking-[0.45em] text-white/25 font-mono">Vehicle</p>
-        <p className="text-[11px] uppercase tracking-[0.3em] text-white/50 font-mono mt-0.5">F1 · Racing</p>
+        <p className="text-[9px] uppercase tracking-[0.45em] text-lime-400 font-mono">Vehicle</p>
+        <p className="text-[11px] uppercase tracking-[0.3em] text-lime-400/90 font-mono mt-0.5">F1 · Racing</p>
       </div>
       <div className="absolute top-8 right-10 z-30 pointer-events-none text-right">
-        <p className="text-[9px] uppercase tracking-[0.45em] text-white/25 font-mono">Status</p>
-        <p className="text-[11px] uppercase tracking-[0.3em] text-white/50 font-mono mt-0.5">● Active</p>
+        <p className="text-[9px] uppercase tracking-[0.45em] text-lime-400 font-mono">Status</p>
+        <p className="text-[11px] uppercase tracking-[0.3em] text-lime-400/90 font-mono mt-0.5">● Active</p>
       </div>
 
       {/* Corner brackets */}
       {(['top-6 left-6 border-t border-l', 'top-6 right-6 border-t border-r', 'bottom-6 left-6 border-b border-l', 'bottom-6 right-6 border-b border-r'] as const).map((cls, i) => (
-        <div key={i} className={`absolute w-5 h-5 ${cls} border-white/15 z-20 pointer-events-none`} />
+        <div key={i} className={`absolute w-5 h-5 ${cls} border-lime-400/15 z-20 pointer-events-none`} />
       ))}
 
       {/* THE CAR — full width, cinematic */}

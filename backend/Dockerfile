@@ -13,11 +13,13 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Download model to bake into Docker image cache for instant cold starts
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('Systran/faster-distil-whisper-large-v3', device='cpu', compute_type='int8')"
+
 # Copy backend application files
 COPY . .
 
-# Hugging Face Spaces uses port 7860 by default
-ENV PORT=7860
-EXPOSE 7860
+ENV PORT=8000
+EXPOSE 8000
 
-CMD ["python", "main.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

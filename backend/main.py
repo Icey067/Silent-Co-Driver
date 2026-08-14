@@ -1,23 +1,23 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+import os
+import json
+import asyncio
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from fastapi import FastAPI, UploadFile, File, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import whisper
-from transformers import pipeline
-import json
-import os
-import shutil
-import warnings
-import asyncio
-import gc
-import torch
-import soundfile as sf
-import torchaudio.functional as F
-import noisereduce as nr
-import numpy as np
+import aiofiles
+from dotenv import load_dotenv
+from groq import Groq
 
-warnings.filterwarnings("ignore")
+# Import the new local audio pipeline
+from pipeline import AudioPipeline
 
-app = FastAPI(title="The Silent Co-Driver API")
+# Load environment variables
+load_dotenv()
+
+# Initialize FastAPI
+app = FastAPI(title="The Silent Co-Driver API (Hybrid)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,14 +27,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global lock to ensure sequential processing
-inference_lock = asyncio.Lock()
+# Global variables
+audio_pipeline = None
+groq_client = None
+executor = ThreadPoolExecutor(max_workers=2)
 
-class AnalysisResult(BaseModel):
+@app.on_event("startup")
+def startup_event():
+    global audio_pipeline, groq_client
+    # Initialize the local audio engine
+    audio_pipeline = AudioPipeline()
+    
+    # Initialize Groq client
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        print("WARNING: GROQ_API_KEY is not set in environment or .env file.")
+    else:
+        groq_client = Groq(api_key=api_key)
+
+class DriverAnalysisResponse(BaseModel):
     transcript: str
-    mood: str
     stress_score: int
-    confidence: float
+    status: str
+    driver_feedback_category: str
+    actionable_insight: str
+    tactical_intent: str
+    lap: int = 0
 
 @app.get("/telemetry")
 def get_telemetry():
@@ -45,102 +63,198 @@ def get_telemetry():
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="telemetry.json not found")
 
-@app.post("/analyze-radio", response_model=AnalysisResult)
-async def analyze_radio(file: UploadFile = File(...)):
-    # 1. Acquire lock to prevent multiple requests crashing VRAM
-    async with inference_lock:
-        temp_file_path = f"temp_{file.filename}"
-        with open(temp_file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        try:
-            # Read audio
-            audio_data, sr = sf.read(temp_file_path)
+@app.websocket("/ws/radio")
+async def websocket_radio_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    if groq_client is None:
+        await websocket.close(code=1011, reason="Groq client is not initialized.")
+        return
+
+    try:
+        while True:
+            audio_bytes = await websocket.receive_bytes()
+            temp_file_path = f"temp_{uuid.uuid4().hex}.wav"
             
-            # Convert to mono if multi-channel
-            if audio_data.ndim > 1:
-                audio_data = audio_data.mean(axis=1)
-
-            # Pre-Processing: Spectral Noise Reduction
-            print("Applying noise reduction...")
-            audio_data = nr.reduce_noise(y=audio_data, sr=sr)
-            
-            audio_tensor = torch.from_numpy(audio_data.astype("float32"))
-
-            # Transcribe model needs 16kHz
-            if sr != 16000:
-                whisper_audio = F.resample(audio_tensor, sr, 16000).numpy()
-            else:
-                whisper_audio = audio_tensor.numpy()
-
-            # --- MODEL 1: Transcription ---
-            print("Loading Whisper model into VRAM...")
-            whisper_model = whisper.load_model("base")
-            print("Transcribing...")
-            # Run inference
-            result = whisper_model.transcribe(whisper_audio)
-            transcript = result.get("text", "").strip()
-            
-            # Extract average confidence from segments
-            segments = result.get("segments", [])
-            if segments:
-                # no_speech_prob is given per segment, confidence ~ 1 - no_speech_prob
-                avg_confidence = np.mean([1.0 - s.get("no_speech_prob", 0.0) for s in segments])
-            else:
-                avg_confidence = 0.9 # Default if no segments found
-
-            # Unload Whisper completely
-            print("Unloading Whisper and clearing VRAM...")
-            del whisper_model
-            gc.collect()
-            torch.cuda.empty_cache()
-
-            # --- MODEL 2: Emotion Recognition ---
-            print("Loading SER model into VRAM...")
-            emotion_classifier = pipeline("audio-classification", model="ehcalabres/wav2vec2-lg-xlsr-en-speech-emotion-recognition")
-            
-            print("Extracting emotions...")
-            # We pass the cleaned audio to emotion recognition as well
-            emotions = emotion_classifier({"array": audio_data.astype("float32"), "sampling_rate": sr})
-            
-            top_emotion = emotions[0]
-            label = top_emotion["label"].lower() # Ensure lowercase
-            emotion_confidence = top_emotion["score"]
-
-            print(f"Top detected emotion: {label} ({emotion_confidence})")
-
-            # Map to Stressed/Calm
-            if label in ["angry", "fearful"]:
-                mood = "Stressed"
-                stress_score = int(emotion_confidence * 10) # 0 to 10
-                if stress_score < 6:
-                    stress_score = 7 # Boost base stress if explicitly angry/fearful
-            else:
-                # happy, sad, neutral, etc
-                mood = "Calm"
-                stress_score = max(1, int((1 - emotion_confidence) * 4)) # Lower score for calm
+            try:
+                async with aiofiles.open(temp_file_path, 'wb') as out_file:
+                    await out_file.write(audio_bytes)
                 
+                loop = asyncio.get_event_loop()
+                try:
+                    pipeline_result = await loop.run_in_executor(
+                        executor, 
+                        audio_pipeline.process_audio, 
+                        temp_file_path
+                    )
+                except ValueError as ve:
+                    print(f"WebSocket audio rejected: {ve}")
+                    await websocket.send_json({"error": str(ve)})
+                    continue
+                
+                transcript = pipeline_result["transcript"]
+                if not transcript or transcript.strip() == "":
+                    transcript = "[Unintelligible / Heavy Static]"
+                metrics = pipeline_result["acoustic_metrics"]
+                
+                # Only invoke LLM if voice/transcript was detected (VAD filter passed)
+                if transcript:
+                    system_prompt = """You are an elite F1 race engineer AI. 
+Analyze the driver's radio transcript and acoustic metrics to determine their state and needs.
+Heavily weight the acoustic rms_energy and pitch_variability when the transcript contains urgent F1 keywords (e.g., 'puncture', 'snap', 'box').
+You must return a JSON object that exactly matches the following schema:
+{
+  "transcript": "string",
+  "stress_score": "integer between 0 and 10",
+  "status": "string (e.g., Calm, Stressed, Frustrated, Panicking, Tired)",
+  "driver_feedback_category": "string (e.g., Setup, Tires, Traffic, Information)",
+  "actionable_insight": "string (short instruction to the race engineer)",
+  "tactical_intent": "string (what the driver is trying to achieve)"
+}
+"""
+                    user_prompt = f"""
+Transcript: "{transcript}"
+Acoustic Metrics:
+- RMS Energy (Loudness): {metrics['rms_energy']:.4f}
+- Pitch Variability (Tone/Stress marker): {metrics['pitch_variability']:.4f}
 
-            # Unload SER model
-            print("Unloading SER model and clearing VRAM...")
-            del emotion_classifier
-            gc.collect()
-            torch.cuda.empty_cache()
+Analyze the data and provide the JSON output.
+"""
+                    completion = groq_client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        response_format={"type": "json_object"},
+                        temperature=0.2,
+                    )
+                    
+                    llm_response = json.loads(completion.choices[0].message.content)
+                    llm_response["transcript"] = transcript
+                    
+                    # Fetch latest lap for sync
+                    latest_lap = 0
+                    try:
+                        with open("telemetry.json", "r") as f:
+                            t_data = json.load(f)
+                            if t_data and isinstance(t_data, list):
+                                latest_lap = t_data[-1].get("lap", 0)
+                    except Exception:
+                        pass
+                        
+                    llm_response["lap"] = latest_lap
+                    
+                    await websocket.send_json(llm_response)
+                
+            except Exception as e:
+                print(f"Error processing audio chunk: {e}")
+            finally:
+                if os.path.exists(temp_file_path):
+                    try:
+                        os.remove(temp_file_path)
+                    except Exception as e:
+                        print(f"Failed to remove temp file: {e}")
+                        
+    except WebSocketDisconnect:
+        print("WebSocket client disconnected.")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
 
-            return AnalysisResult(
-                transcript=transcript,
-                mood=mood,
-                stress_score=stress_score,
-                confidence=round(float(avg_confidence), 4)
+@app.post("/analyze-radio", response_model=DriverAnalysisResponse)
+async def analyze_radio(file: UploadFile = File(...)):
+    if groq_client is None:
+        raise HTTPException(status_code=500, detail="Groq client is not initialized. Check API key.")
+        
+    temp_file_path = f"temp_{file.filename}"
+    
+    try:
+        # Save uploaded file asynchronously
+        async with aiofiles.open(temp_file_path, 'wb') as out_file:
+            content = await file.read()
+            await out_file.write(content)
+            
+        # Run local audio processing in a separate thread to avoid blocking event loop
+        loop = asyncio.get_event_loop()
+        try:
+            pipeline_result = await loop.run_in_executor(
+                executor, 
+                audio_pipeline.process_audio, 
+                temp_file_path
             )
-        except Exception as e:
-            print(f"Error in analyze_radio: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
-        finally:
-            if os.path.exists(temp_file_path):
+        except ValueError as ve:
+            raise HTTPException(status_code=400, detail=str(ve))
+        
+        transcript = pipeline_result["transcript"]
+        if not transcript or transcript.strip() == "":
+            transcript = "[Unintelligible / Heavy Static]"
+        metrics = pipeline_result["acoustic_metrics"]
+        
+        # Prepare the prompt for Groq
+        system_prompt = """You are an elite F1 race engineer AI. 
+Analyze the driver's radio transcript and acoustic metrics to determine their state and needs.
+Heavily weight the acoustic rms_energy and pitch_variability when the transcript contains urgent F1 keywords (e.g., 'puncture', 'snap', 'box').
+You must return a JSON object that exactly matches the following schema:
+{
+  "transcript": "string",
+  "stress_score": "integer between 0 and 10",
+  "status": "string (e.g., Calm, Stressed, Frustrated, Panicking, Tired)",
+  "driver_feedback_category": "string (e.g., Setup, Tires, Traffic, Information)",
+  "actionable_insight": "string (short instruction to the race engineer)",
+  "tactical_intent": "string (what the driver is trying to achieve)"
+}
+"""
+        user_prompt = f"""
+Transcript: "{transcript}"
+Acoustic Metrics:
+- RMS Energy (Loudness): {metrics['rms_energy']:.4f}
+- Pitch Variability (Tone/Stress marker): {metrics['pitch_variability']:.4f}
+
+Analyze the data and provide the JSON output.
+"""
+        # Call Groq LLM
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.2,
+        )
+        
+        # Parse the JSON response
+        llm_response = json.loads(completion.choices[0].message.content)
+        
+        # Ensure transcript in response matches actual transcript
+        llm_response["transcript"] = transcript
+        
+        # Fetch latest lap for sync
+        latest_lap = 0
+        try:
+            with open("telemetry.json", "r") as f:
+                t_data = json.load(f)
+                if t_data and isinstance(t_data, list):
+                    latest_lap = t_data[-1].get("lap", 0)
+        except Exception:
+            pass
+            
+        llm_response["lap"] = latest_lap
+        
+        return DriverAnalysisResponse(**llm_response)
+        
+    except Exception as e:
+        print(f"Error in analyze_radio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+        
+    finally:
+        # Cleanup temporary audio file
+        if os.path.exists(temp_file_path):
+            try:
                 os.remove(temp_file_path)
+            except Exception as cleanup_error:
+                print(f"Failed to remove temp file: {cleanup_error}")
 
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)

@@ -308,7 +308,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({ modelPath }) => {
           Real-time AI Analysis
         </p>
         <h2 className="ic-label text-4xl md:text-5xl font-black tracking-tight leading-tight mb-6">
-          <span className="block text-white">Intelligence</span>
+          <span className="block text-lime-400">Intelligence</span>
           <span
             className="block text-transparent bg-clip-text"
             style={{
@@ -369,7 +369,7 @@ const InteractiveCanvas: React.FC<InteractiveCanvasProps> = ({ modelPath }) => {
 
         {/* HUD label */}
         <div className="absolute top-4 left-4 z-10 flex items-center gap-2 pointer-events-none">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-lime-500 animate-pulse" />
           <span className="text-[10px] uppercase tracking-[0.3em] text-slate-400 font-mono">
             3D Engine Active
           </span>
