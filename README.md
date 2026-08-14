@@ -1,22 +1,23 @@
 # The Silent Co-Driver 🏎️🎙️
-> Reading Driver Stress from Radio Calls
+> Reading Driver Stress from Radio Calls & Telemetry
 
-The Silent Co-Driver is a real-time race telemetry & driver stress monitoring system designed for motorsport pit-wall engineers. The system analyzes a driver's radio audio clips to transcribe speech, detect mood and stress levels, and display this telemetry alongside lap-time data on a sleek React dashboard. By correlating high stress levels with slower lap times, engineers can make proactive strategy calls.
+The Silent Co-Driver is a real-time race telemetry & driver stress monitoring system designed for motorsport pit-wall engineers. The system analyzes a driver's radio audio clips to transcribe speech, detect acoustic stress markers, and feed this data into an advanced LLM to generate actionable F1 insights. By correlating high stress levels with slower lap times, engineers can make proactive strategy calls.
 
 ## Features
-- **Speech-to-Text Transcription**: Automatically transcribes driver radio messages using OpenAI's Whisper model.
-- **Zero-shot Speech Emotion Recognition (SER)**: Analyzes the audio waveform using Hugging Face's `wav2vec2-base-superb-er` to determine if the driver is Calm, Tired, or Stressed.
-- **Stress Index Mapping**: Maps emotional inferences to a 1-10 Stress Index.
-- **Live Telemetry Dashboard**: A dark-mode, React-powered UI featuring Recharts for data visualization.
-- **Interactive Audio Control Panel**: Upload radio clips directly from the dashboard to run live AI inference.
+- **CPU-Optimized ASR Pipeline**: Utilizes `faster-distil-whisper-large-v3` running with `int8` precision for lightning-fast, local CPU transcription of driver radio communications.
+- **Acoustic Audio Normalization**: Uses `librosa` to normalize audio, extract RMS energy (loudness), and measure Pitch Variability (F0) as markers for stress and urgency.
+- **Groq LLM F1 Telemetry**: Feeds transcribed text and acoustic metrics into `llama-3.3-70b-versatile` via Groq for zero-shot driver state analysis. It determines stress scores, tactical intent, and actionable insights for the race engineer.
+- **Live WebSocket Streaming**: Supports real-time audio chunk streaming from the frontend to the backend for immediate analysis.
+- **Minimal React/Tailwind Dashboard**: A dark-mode, React-powered pit-wall UI featuring `Recharts` for telemetry visualization, a `UnifiedDriverPanel`, `TacticalDirectiveCard`, and `RadioIncidentLog`.
 
 ## Tech Stack
-* **AI Models:**
-  - Speech-to-Text: `openai/whisper` (tiny)
-  - Emotion Recognition: `superb/wav2vec2-base-superb-er`
-* **Backend:** Python + FastAPI + Uvicorn
+* **AI Models & Pipeline:**
+  - Speech-to-Text: `Systran/faster-distil-whisper-large-v3` (Faster-Whisper)
+  - Audio Processing: `librosa`, `numpy`
+  - LLM Inference: `llama-3.3-70b-versatile` (via Groq API)
+* **Backend:** Python + FastAPI + Uvicorn + WebSockets
 * **Frontend:** React + Vite + Tailwind CSS + Recharts
-* **Data Processing:** PyTorch, Torchaudio, gTTS/pyttsx3
+* **Data Generation:** Local Text-to-Speech mock generators
 
 ---
 
@@ -24,6 +25,7 @@ The Silent Co-Driver is a real-time race telemetry & driver stress monitoring sy
 
 ### 1. Clone & Setup
 Ensure you have Python 3.9+ and Node.js installed on your machine.
+You will also need a Groq API key for the LLM analysis.
 
 ### 2. Backend Setup
 Navigate to the `backend` directory and install the Python dependencies.
@@ -32,18 +34,23 @@ cd backend
 pip install -r requirements.txt
 ```
 
-#### Generate Mock Data
-We've included a script to generate 10 laps of dummy telemetry data and 3 realistic test radio `.wav` clips using local Text-to-Speech (`pyttsx3`). Run this before starting the server:
-```bash
-python setup_mock_data.py
+Create a `.env` file in the `backend` directory and add your Groq API key:
+```env
+GROQ_API_KEY=your_groq_api_key_here
 ```
-*(This will generate `telemetry.json` and populate the `audio_clips/` folder).*
+
+#### Generate Mock Data
+We've included a script to generate dummy telemetry data and test radio `.wav` clips. Run this before starting the server:
+```bash
+python mock_telemetry_generator.py
+```
+*(This will generate `telemetry.json` and test audio clips).*
 
 #### Start the API Server
 ```bash
 uvicorn main:app --reload
 ```
-The FastAPI server will start at `http://localhost:8000`. Note that the AI models (`whisper` and `wav2vec2`) are loaded into memory on startup, so the initial run may take a few seconds to download the model weights.
+The FastAPI server will start at `http://localhost:8000`. The Whisper model is loaded into memory on startup; the initial run may take a few seconds to download the model weights to the local cache.
 
 ### 3. Frontend Setup
 Open a new terminal, navigate to the `frontend` directory, and install the Node dependencies.
@@ -62,7 +69,7 @@ The Vite development server will start at `http://localhost:5173`.
 
 ## 🛠️ Usage
 1. Open the dashboard in your web browser (`http://localhost:5173`).
-2. Observe the **Telemetry Chart** plotting the historical Lap Times vs Stress Index across 10 laps.
-3. Use the **Audio Control Panel** to upload one of the generated clips from the `backend/audio_clips/` folder.
-4. Click **Analyze Clip**.
-5. Watch the **Driver Status Card** update dynamically with the transcribed text, AI confidence score, and color-coded stress level (Green/Yellow/Red).
+2. Observe the **Telemetry Chart** plotting the historical Lap Times vs. Stress Index.
+3. Review the **Unified Driver Panel** and **Radio Incident Log** for ongoing updates.
+4. Upload or stream audio clips to the system. The Faster-Whisper pipeline will transcribe the audio, extract acoustic metrics, and the Groq LLM will generate tactical directives and stress scores.
+5. Watch the dashboard update dynamically with actionable insights.
