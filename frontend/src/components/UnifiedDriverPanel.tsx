@@ -35,7 +35,10 @@ const UnifiedDriverPanel: React.FC<Props> = ({
     try {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
       const res = await axios.post(`${baseUrl}/analyze-radio`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'ngrok-skip-browser-warning': 'true'
+        },
       });
       onAnalysisResult(res.data);
     } catch (err: any) {
@@ -52,13 +55,13 @@ const UnifiedDriverPanel: React.FC<Props> = ({
 
   return (
     <div className="relative bg-black/40 border border-white/10 rounded-2xl p-6 overflow-hidden backdrop-blur-xl">
-      {/* Top accent line */}
+      {/* cool glowing line at the top */}
       <div 
         className="absolute top-0 inset-x-0 h-[2px]" 
         style={{ backgroundImage: `linear-gradient(to right, transparent, ${stressColor}80, transparent)` }} 
       />
 
-      {/* TOP SECTION: Audio Input (Compact) */}
+      {/* audio file picker and analyze button */}
       <div className="flex items-center gap-3 mb-8">
         <label className="flex-1 flex items-center gap-3 border border-white/10 rounded-lg p-2 cursor-pointer hover:border-white/20 transition-colors bg-white/5">
           <Upload className="w-4 h-4 text-white/70 ml-1" />
@@ -86,7 +89,7 @@ const UnifiedDriverPanel: React.FC<Props> = ({
         </button>
       </div>
 
-      {/* MIDDLE SECTION: Mood Index & Score */}
+      {/* circular stress meter and driver status */}
       <div className="flex items-center justify-between mb-8 px-2">
         <div className="flex items-center gap-6">
           <div className="relative flex-none">
@@ -116,7 +119,7 @@ const UnifiedDriverPanel: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* BOTTOM SECTION: Transcript Box */}
+      {/* radio transcript display */}
       <div className="border border-white/10 rounded-lg p-4 bg-white/[0.02]">
         <p className="text-[9px] uppercase tracking-[0.4em] text-white/50 font-mono mb-2 flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: stressColor }} />

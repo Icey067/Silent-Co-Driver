@@ -21,7 +21,7 @@ const TacticalDirectiveCard: React.FC<Props> = ({ category, actionableInsight, t
       />
       
       <div className="flex flex-col gap-4">
-        {/* Category Badge */}
+        {/* category pill */}
         <div>
           <span 
             className="inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-widest font-mono rounded"
@@ -31,12 +31,12 @@ const TacticalDirectiveCard: React.FC<Props> = ({ category, actionableInsight, t
           </span>
         </div>
         
-        {/* Hero Instruction */}
+        {/* main instruction text */}
         <h3 className="text-lg font-black text-white uppercase tracking-wide leading-snug">
           {actionableInsight}
         </h3>
         
-        {/* Context */}
+        {/* additional context */}
         <div className="pt-3 border-t border-white/10">
           <p className="text-xs text-white/60 font-mono leading-relaxed">
             {tacticalIntent}

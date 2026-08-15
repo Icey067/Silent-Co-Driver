@@ -16,19 +16,19 @@ function App() {
   const [radioHistory, setRadioHistory] = useState<any[]>([]);
 
   const handleAnalysisResult = (result: any) => {
-    // Add a mocked lap if it doesn't exist, just for visual realism
+    // mock the lap number for extra visual flair if we don't have one
     const enrichedResult = { ...result, lap: Math.floor(Math.random() * 50) + 1 };
     
     setAnalysisResult(enrichedResult);
-    setRadioHistory((prev) => [enrichedResult, ...prev].slice(0, 15)); // keep last 15
+    setRadioHistory((prev) => [enrichedResult, ...prev].slice(0, 15)); // only keep the last 15
   };
 
   return (
     <div className="bg-black text-lime-400 font-sans overflow-hidden">
-      {/* ── Hero ── */}
+      {/* splash screen */}
       <HeroReveal />
 
-      {/* ── Live Dashboard with NK Studio Scroll Animation ── */}
+      {/* the main dashboard (with fancy scrolling) */}
       <LiveDashboard
         analysisResult={analysisResult}
         radioHistory={radioHistory}

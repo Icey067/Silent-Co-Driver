@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Suppress librosa warnings if necessary
+# silence those annoying librosa warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -18,14 +18,14 @@ class AudioPipeline:
         logger.info("Model loaded successfully on CPU.")
 
     def extract_voice_metrics(self, y: np.ndarray, sr: int):
-        # Calculate RMS energy
+        # figure out how loud they're yelling (rms)
         rms = librosa.feature.rms(y=y)[0]
         mean_rms_energy = float(np.mean(rms)) if len(rms) > 0 else 0.0
         
-        # Calculate Pitch (F0) using librosa.yin
+        # extract the pitch
         pitches = librosa.yin(y, fmin=60, fmax=450, sr=sr)
         
-        # Filter out NaN values
+        # drop the nans
         valid_pitches = pitches[~np.isnan(pitches)]
         if len(valid_pitches) > 5:
             mean_pitch = float(np.mean(valid_pitches))
@@ -43,16 +43,16 @@ class AudioPipeline:
     def process_audio(self, file_path: str):
         logger.info(f"Processing audio: {file_path}")
         
-        # Audio Duration Guard
+        # guard against massive audio files
         duration = librosa.get_duration(path=file_path)
         if duration > 30.0:
             raise ValueError(f"Audio duration ({duration:.1f}s) exceeds the 30-second limit to prevent CPU thread starvation.")
         
-        # Load and peak normalize audio
+        # load it up and normalize peaks
         y, sr = librosa.load(file_path, sr=16000, mono=True)
         y_normalized = librosa.util.normalize(y)
 
-        # 1. Transcribe
+        # step 1: transcribe
         try:
             prompt = "F1 driver radio communications, racing terminology. Max, Lewis, Charles, Lando. understeer, oversteer, graining, blistering, delta, DRS, strat, mode, recharge, deploy, hards, mediums, softs, brake bias."
             segments, info = self.whisper.transcribe(
@@ -75,7 +75,7 @@ class AudioPipeline:
             logger.info(f"Transcription failed: {e}")
             full_transcript = ""
         
-        # 2. Extract Features
+        # step 2: extract acoustic features
         features = self.extract_voice_metrics(y_normalized, sr)
         
         return {

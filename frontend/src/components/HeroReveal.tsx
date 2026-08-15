@@ -19,37 +19,37 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
   const overlayRef   = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // ── Santioni-style: slow, deliberate entrance ──
-    // The dark overlay fades away first, then type rises up one word at a time
+    // slow deliberate entrance animation
+    // fade the overlay then lift the text
     const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
-    // Initial states
+    // set up initial states
     gsap.set(overlayRef.current,  { opacity: 1 });
     gsap.set(eyebrowRef.current,  { opacity: 0, y: 20 });
     gsap.set(headingRef.current,  { opacity: 0 });
     gsap.set(subRef.current,      { opacity: 0, y: 24 });
     gsap.set(scrollCueRef.current,{ opacity: 0 });
 
-    // 1. Overlay fades out slowly (Santioni does a dark-to-reveal)
+    // 1. fade out the dark overlay
     tl.to(overlayRef.current, {
       opacity: 0,
       duration: 1.8,
       ease: 'power2.inOut',
     })
-    // 2. Eyebrow
+    // 2. animate eyebrow text
     .to(eyebrowRef.current, { opacity: 1, y: 0, duration: 1.0 }, '-=0.8')
-    // 3. Heading fades + rises — Santioni uses slow stately reveals
+    // 3. slowly reveal the main heading
     .to(headingRef.current, {
       opacity: 1,
       duration: 1.4,
       ease: 'power3.out',
     }, '-=0.6')
-    // 4. Sub copy
+    // 4. bring in the sub copy
     .to(subRef.current, { opacity: 1, y: 0, duration: 1.0 }, '-=0.7')
-    // 5. Scroll cue
+    // 5. show the scroll indicator
     .to(scrollCueRef.current, { opacity: 1, duration: 0.8 }, '-=0.3');
 
-    // Scroll parallax — video drifts slower than scroll speed
+    // make the video drift slightly slower than we scroll
     gsap.to('.hero-video-layer', {
       yPercent: -20,
       ease: 'none',
@@ -61,7 +61,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
       },
     });
 
-    // Content lifts away as user scrolls
+    // push content up and out on scroll
     gsap.to('.hero-content-layer', {
       opacity: 0,
       y: -60,
@@ -75,7 +75,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
     });
   }, { scope: containerRef });
 
-  // Mouse parallax — subtle depth
+  // mouse movement depth effect
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 16;
@@ -104,7 +104,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
       ref={containerRef}
       className="relative w-full h-screen overflow-hidden bg-black flex items-center justify-center"
     >
-      {/* ── Video / gradient background ── */}
+      {/* background container */}
       <div className="hero-video-layer absolute inset-0 scale-110">
         {videoSrc ? (
           <video
@@ -117,7 +117,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
           />
         ) : (
           <div className="w-full h-full bg-black">
-            {/* Neon grid */}
+            {/* faint neon grid */}
             <div
               className="absolute inset-0 opacity-[0.05]"
               style={{
@@ -126,20 +126,20 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
                 backgroundSize: '80px 80px',
               }}
             />
-            {/* Glowing orbs */}
+            {/* glowing background orbs */}
             <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-lime-500/5 rounded-full blur-[140px]" />
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-lime-500/3 rounded-full blur-[120px]" />
           </div>
         )}
       </div>
 
-      {/* ── Dark fade-in overlay (replaces the SVG circle effect) ── */}
+      {/* dark overlay to control reveal pacing */}
       <div
         ref={overlayRef}
         className="absolute inset-0 bg-black z-10 pointer-events-none"
       />
 
-      {/* ── Vignette (permanent subtle dark edges) ── */}
+      {/* edge vignette */}
       <div
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
@@ -147,10 +147,10 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
         }}
       />
 
-      {/* ── Hero content ── */}
+      {/* main content area */}
       <div className="hero-content-layer relative z-20 flex flex-col items-center text-center px-6 select-none">
         <div className="hero-text-layer flex flex-col items-center">
-          {/* Eyebrow */}
+          {/* eyebrow text */}
           <p
             ref={eyebrowRef}
             className="text-[10px] uppercase tracking-[0.5em] text-lime-400/70 font-semibold mb-8 font-mono"
@@ -158,7 +158,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
             AI-Powered Motorsport Intelligence
           </p>
 
-          {/* Main heading — large, stately, Santioni-weight */}
+          {/* main title text */}
           <h1
             ref={headingRef}
             className="text-[13vw] md:text-[10vw] lg:text-[8vw] font-black tracking-[-0.04em] leading-none mb-8"
@@ -177,7 +177,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
             </span>
           </h1>
 
-          {/* Sub copy */}
+          {/* subtitle text */}
           <p
             ref={subRef}
             className="max-w-md text-slate-300/70 text-sm md:text-base leading-relaxed tracking-wide mb-12"
@@ -186,7 +186,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
             built for when every millisecond counts.
           </p>
 
-          {/* Scroll cue */}
+          {/* scroll indicator */}
           <div ref={scrollCueRef} className="flex flex-col items-center gap-3">
             <span className="text-[9px] uppercase tracking-[0.45em] text-slate-500">
               Scroll
@@ -198,7 +198,7 @@ const HeroReveal: React.FC<HeroRevealProps> = ({ videoSrc }) => {
         </div>
       </div>
 
-      {/* Bottom fade to next section */}
+      {/* gradient fade into the next section */}
       <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black to-transparent pointer-events-none z-20" />
     </section>
   );

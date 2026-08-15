@@ -10,24 +10,24 @@ import aiofiles
 from dotenv import load_dotenv
 from groq import Groq
 
-# Import the new local audio pipeline
+# import our local audio engine
 from pipeline import AudioPipeline
 
-# Load environment variables
+# load up env vars
 load_dotenv()
 
-# Initialize FastAPI
+# fire up fastapi
 app = FastAPI(title="The Silent Co-Driver API (Hybrid)")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Global variables
+# globals for state
 audio_pipeline = None
 groq_client = None
 executor = ThreadPoolExecutor(max_workers=2)
@@ -35,10 +35,10 @@ executor = ThreadPoolExecutor(max_workers=2)
 @app.on_event("startup")
 def startup_event():
     global audio_pipeline, groq_client
-    # Initialize the local audio engine
+    # init the local audio pipeline
     audio_pipeline = AudioPipeline()
     
-    # Initialize Groq client
+    # set up the groq client for llm
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         print("WARNING: GROQ_API_KEY is not set in environment or .env file.")
@@ -96,7 +96,7 @@ async def websocket_radio_endpoint(websocket: WebSocket):
                     transcript = "[Unintelligible / Heavy Static]"
                 metrics = pipeline_result["acoustic_metrics"]
                 
-                # Only invoke LLM if voice/transcript was detected (VAD filter passed)
+                # skip the llm call if there's no speech
                 if transcript:
                     system_prompt = """You are an elite F1 race engineer AI. 
 Analyze the driver's radio transcript and acoustic metrics to determine their state and needs.
@@ -132,7 +132,7 @@ Analyze the data and provide the JSON output.
                     llm_response = json.loads(completion.choices[0].message.content)
                     llm_response["transcript"] = transcript
                     
-                    # Fetch latest lap for sync
+                    # try grabbing the current lap from telemetry
                     latest_lap = 0
                     try:
                         with open("telemetry.json", "r") as f:
@@ -168,12 +168,12 @@ async def analyze_radio(file: UploadFile = File(...)):
     temp_file_path = f"temp_{file.filename}"
     
     try:
-        # Save uploaded file asynchronously
+        # async save so we don't block
         async with aiofiles.open(temp_file_path, 'wb') as out_file:
             content = await file.read()
             await out_file.write(content)
             
-        # Run local audio processing in a separate thread to avoid blocking event loop
+        # offload the heavy audio lifting to a background thread
         loop = asyncio.get_event_loop()
         try:
             pipeline_result = await loop.run_in_executor(
@@ -189,7 +189,7 @@ async def analyze_radio(file: UploadFile = File(...)):
             transcript = "[Unintelligible / Heavy Static]"
         metrics = pipeline_result["acoustic_metrics"]
         
-        # Prepare the prompt for Groq
+        # set up prompts
         system_prompt = """You are an elite F1 race engineer AI. 
 Analyze the driver's radio transcript and acoustic metrics to determine their state and needs.
 Heavily weight the acoustic rms_energy and pitch_variability when the transcript contains urgent F1 keywords (e.g., 'puncture', 'snap', 'box').
@@ -211,7 +211,7 @@ Acoustic Metrics:
 
 Analyze the data and provide the JSON output.
 """
-        # Call Groq LLM
+        # hit the groq api
         completion = groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
@@ -222,13 +222,13 @@ Analyze the data and provide the JSON output.
             temperature=0.2,
         )
         
-        # Parse the JSON response
+        # parse out the json
         llm_response = json.loads(completion.choices[0].message.content)
         
-        # Ensure transcript in response matches actual transcript
+        # force the transcript to match what we actually transcribed
         llm_response["transcript"] = transcript
         
-        # Fetch latest lap for sync
+        # grab latest lap
         latest_lap = 0
         try:
             with open("telemetry.json", "r") as f:
@@ -247,7 +247,7 @@ Analyze the data and provide the JSON output.
         raise HTTPException(status_code=500, detail=str(e))
         
     finally:
-        # Cleanup temporary audio file
+        # clean up the temp file
         if os.path.exists(temp_file_path):
             try:
                 os.remove(temp_file_path)

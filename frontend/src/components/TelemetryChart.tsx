@@ -24,7 +24,11 @@ const TelemetryChart: React.FC<Props> = ({ stressScore = 0 }) => {
     const fetchTelemetry = async () => {
       try {
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-        const res = await axios.get(`${baseUrl}/telemetry`);
+        const res = await axios.get(`${baseUrl}/telemetry`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         setData(res.data);
       } catch (err) {
         console.error('Failed to fetch telemetry', err);
@@ -39,13 +43,13 @@ const TelemetryChart: React.FC<Props> = ({ stressScore = 0 }) => {
 
   return (
     <div className="relative bg-black/40 border border-white/10 rounded-2xl p-6 h-full flex flex-col overflow-hidden backdrop-blur-xl">
-      {/* Top accent */}
+      {/* glowing top border */}
       <div 
         className="absolute top-0 inset-x-0 h-[2px]" 
         style={{ backgroundImage: `linear-gradient(to right, transparent, ${dynamicColor}80, transparent)` }} 
       />
 
-      {/* Header */}
+      {/* section header */}
       <div className="flex items-center gap-3 mb-8">
         <div className="w-8 h-8 rounded-lg border border-white/10 bg-white/5 flex items-center justify-center">
           <BarChart2 className="w-4 h-4 text-white/90" />
@@ -56,7 +60,7 @@ const TelemetryChart: React.FC<Props> = ({ stressScore = 0 }) => {
         </div>
       </div>
 
-      {/* Legend */}
+      {/* custom legend */}
       <div className="flex items-center gap-6 mb-6">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-white/20" />
@@ -68,7 +72,7 @@ const TelemetryChart: React.FC<Props> = ({ stressScore = 0 }) => {
         </div>
       </div>
 
-      {/* Chart */}
+      {/* main chart container */}
       <div className="flex-1 w-full min-h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 5, right: 16, left: 0, bottom: 20 }}>
@@ -131,7 +135,7 @@ const TelemetryChart: React.FC<Props> = ({ stressScore = 0 }) => {
               cursor={{ fill: 'rgba(255,255,255,0.02)' }}
             />
 
-            {/* Lap Time bars with strictly ~25% opacity as requested */}
+            {/* lap time bars (keeping opacity low so it doesn't distract from the stress line) */}
             <Bar
               yAxisId="left"
               dataKey="lap_time"
