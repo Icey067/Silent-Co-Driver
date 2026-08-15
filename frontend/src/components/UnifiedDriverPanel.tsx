@@ -38,9 +38,10 @@ const UnifiedDriverPanel: React.FC<Props> = ({
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       onAnalysisResult(res.data);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error analyzing audio:', err);
-      alert('Failed to analyze audio.');
+      const errorDetail = err.response?.data?.detail || err.message || 'Unknown error';
+      alert(`Failed to analyze audio: ${errorDetail}`);
     } finally {
       setLoading(false);
     }
