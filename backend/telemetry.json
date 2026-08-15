@@ -1,142 +1,177 @@
 [
   {
-    "lap": 1,
-    "lap_time": 84.2,
-    "stress_score": 2,
-    "mood": "Calm",
-    "radio_id": "lap1.wav"
-  },
-  {
-    "lap": 2,
-    "lap_time": 84.0,
-    "stress_score": 2,
-    "mood": "Calm",
-    "radio_id": "lap2.wav"
-  },
-  {
-    "lap": 3,
-    "lap_time": 84.5,
-    "stress_score": 3,
-    "mood": "Calm",
-    "radio_id": "lap3.wav"
-  },
-  {
-    "lap": 4,
-    "lap_time": 86.1,
-    "stress_score": 8,
-    "mood": "Stressed",
-    "radio_id": "lap4.wav"
-  },
-  {
-    "lap": 5,
-    "lap_time": 87.3,
+    "lap": 42,
+    "lap_time": 86.939,
     "stress_score": 9,
-    "mood": "Stressed",
-    "radio_id": "lap5.wav"
-  },
-  {
-    "lap": 6,
-    "lap_time": 87.5,
-    "stress_score": 9,
-    "mood": "Stressed",
-    "radio_id": "lap6.wav"
-  },
-  {
-    "lap": 7,
-    "lap_time": 86.8,
-    "stress_score": 6,
-    "mood": "Tired",
-    "radio_id": "lap7.wav"
-  },
-  {
-    "lap": 8,
-    "lap_time": 86.5,
-    "stress_score": 5,
-    "mood": "Tired",
-    "radio_id": "lap8.wav"
-  },
-  {
-    "lap": 9,
-    "lap_time": 85.2,
-    "stress_score": 4,
-    "mood": "Tired",
-    "radio_id": "lap9.wav"
-  },
-  {
-    "lap": 10,
-    "lap_time": 84.8,
-    "stress_score": 3,
-    "mood": "Calm",
-    "radio_id": "lap10.wav"
-  },
-  {
-    "lap": 11,
-    "lap_time": 86.954,
-    "stress_score": 5,
-    "status": "Stressed",
-    "radio_id": "lap11.wav"
-  },
-  {
-    "lap": 12,
-    "lap_time": 85.712,
-    "stress_score": 2,
-    "status": "Calm",
-    "radio_id": "lap12.wav"
-  },
-  {
-    "lap": 13,
-    "lap_time": 87.055,
-    "stress_score": 5,
-    "status": "Stressed",
-    "radio_id": "lap13.wav"
-  },
-  {
-    "lap": 14,
-    "lap_time": 86.437,
-    "stress_score": 5,
-    "status": "Stressed",
-    "radio_id": "lap14.wav"
-  },
-  {
-    "lap": 15,
-    "lap_time": 87.394,
-    "stress_score": 8,
     "status": "Frustrated",
-    "radio_id": "lap15.wav"
+    "radio_id": "lap42.wav"
   },
   {
-    "lap": 16,
-    "lap_time": 85.244,
-    "stress_score": 5,
-    "status": "Stressed",
-    "radio_id": "lap16.wav"
+    "lap": 43,
+    "lap_time": 87.198,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap43.wav"
   },
   {
-    "lap": 17,
-    "lap_time": 85.942,
-    "stress_score": 5,
-    "status": "Stressed",
-    "radio_id": "lap17.wav"
+    "lap": 44,
+    "lap_time": 87.782,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap44.wav"
   },
   {
-    "lap": 18,
-    "lap_time": 85.3,
-    "stress_score": 2,
-    "status": "Calm",
-    "radio_id": "lap18.wav"
+    "lap": 45,
+    "lap_time": 88.144,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap45.wav"
   },
   {
-    "lap": 19,
-    "lap_time": 85.669,
-    "stress_score": 5,
-    "status": "Stressed",
-    "radio_id": "lap19.wav"
+    "lap": 46,
+    "lap_time": 87.596,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap46.wav"
   },
   {
-    "lap": 20,
-    "lap_time": 85.898,
-    "stress_score": 3,
-    "status": "Calm",
-    "radio_id": "lap20.wav"
+    "lap": 47,
+    "lap_time": 86.885,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap47.wav"
+  },
+  {
+    "lap": 48,
+    "lap_time": 88.438,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap48.wav"
+  },
+  {
+    "lap": 49,
+    "lap_time": 88.918,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap49.wav"
+  },
+  {
+    "lap": 50,
+    "lap_time": 87.959,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap50.wav"
+  },
+  {
+    "lap": 51,
+    "lap_time": 88.606,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap51.wav"
+  },
+  {
+    "lap": 52,
+    "lap_time": 87.861,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap52.wav"
+  },
+  {
+    "lap": 53,
+    "lap_time": 88.878,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap53.wav"
+  },
+  {
+    "lap": 54,
+    "lap_time": 88.582,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap54.wav"
+  },
+  {
+    "lap": 55,
+    "lap_time": 87.263,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap55.wav"
+  },
+  {
+    "lap": 56,
+    "lap_time": 88.343,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap56.wav"
+  },
+  {
+    "lap": 57,
+    "lap_time": 87.853,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap57.wav"
+  },
+  {
+    "lap": 58,
+    "lap_time": 88.509,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap58.wav"
+  },
+  {
+    "lap": 59,
+    "lap_time": 87.323,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap59.wav"
+  },
+  {
+    "lap": 60,
+    "lap_time": 87.849,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap60.wav"
+  },
+  {
+    "lap": 61,
+    "lap_time": 88.955,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap61.wav"
+  },
+  {
+    "lap": 62,
+    "lap_time": 89.251,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap62.wav"
+  },
+  {
+    "lap": 63,
+    "lap_time": 88.717,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap63.wav"
+  },
+  {
+    "lap": 64,
+    "lap_time": 88.979,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap64.wav"
+  },
+  {
+    "lap": 65,
+    "lap_time": 89.919,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap65.wav"
+  },
+  {
+    "lap": 66,
+    "lap_time": 89.251,
+    "stress_score": 10,
+    "status": "Frustrated",
+    "radio_id": "lap66.wav"
   }
 ]
